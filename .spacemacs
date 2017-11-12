@@ -369,9 +369,7 @@ configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
   (setq powerline-default-separator 'arrow)
-  (dolist (charset '(kana han cjk-misc bopomofo))
-    (set-fontset-font (frame-parameter nil 'font) charset
-                      (font-spec :family "PingFang SC" :size 14)))
+  (set-fontset-font "fontset-default" 'han '("WenQuanYi Micro Hei"))
   ;;解决org表格里面中英文对齐的问题
   (custom-set-faces
    ;; custom-set-faces was added by Custom.
