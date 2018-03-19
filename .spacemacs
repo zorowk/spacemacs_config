@@ -47,7 +47,8 @@ This function should only modify configuration layer settings."
      zoro-org
      (org :variables
           org-enable-github-support t
-          org-enable-reveal-js-support t)
+          org-enable-reveal-js-support t
+          org-enable-org-journal-support t)
      shell-scripts
      plantuml
      zoro-email
@@ -360,6 +361,12 @@ This function is called immediately after `dotspacemacs/init', before layer
 configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
+  (setq configuration-layer-elpa-archives
+    '(("melpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
+      ("org-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
+      ("gnu-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")))
+  (setq url-gateway-method 'socks)
+  (setq socks-server '("Default server" "127.0.0.1" 1080 5))
   )
 
 (defun dotspacemacs/user-config ()
@@ -368,15 +375,32 @@ This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
-  (setq powerline-default-separator 'arrow)
-  (set-fontset-font "fontset-default" 'han '("WenQuanYi Micro Hei"))
-  ;;解决org表格里面中英文对齐的问题
-  (custom-set-faces
-   ;; custom-set-faces was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(org-table ((t (:foreground "#6c71c4" :family "Ubuntu Mono")))))
+  (when (configuration-layer/layer-usedp 'chinese)
+    (when (and (spacemacs/system-is-mswindows) window-system)
+      (spacemacs//set-monospaced-font "Source Code Pro" "Microsoft Yahei" 14 16)))
+
+  (setq org-bullets-bullet-list '("◉" "●" "○" "★"))
+  (setq org-confirm-babel-evaluate nil
+        org-src-fontify-natively t
+        org-src-tab-acts-natively t)
+  (setq spaceline-org-clock-p t)
+
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+
+  ;; Enable custom neotree theme
+  (doom-themes-neotree-config)  ; all-the-icons fonts must be installed!
+
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config)
+
+  (setq powerline-default-separator 'nil)
+
+  (setq powerline-height 22)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will

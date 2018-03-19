@@ -16,7 +16,8 @@
 
 (setq-default
  org-agenda-dir "~/Documents/Worker"
- deft-dir "~/Documents/Worker")
+ deft-dir "~/Documents/Worker"
+ journal-dir "~/Documents/journal")
 
 (defun zorowk/org-ispell ()
   "Configure `ispell-skip-region-alist' for `org-mode'."

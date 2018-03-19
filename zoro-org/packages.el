@@ -30,11 +30,9 @@
 ;;; Code:
 
 (defconst zoro-org-packages
-  '(
-    (org :location built-in)
+  '((org :location built-in)
     org-pomodoro
-    deft
-    )
+    deft)
   "The list of Lisp packages required by the zoro-org layer.
 
 Each entry is either:
@@ -94,6 +92,7 @@ Each entry is either:
       (setq org-agenda-use-tag-inheritance nil) ;; 3-4x speedup
       (setq org-agenda-window-setup 'current-window)
       (setq org-log-done t)
+      (setq org-startup-indented t)
 
       ;; 加密文章
       ;; "http://coldnew.github.io/blog/2013/07/13_5b094.html"
@@ -157,8 +156,8 @@ Each entry is either:
                                         \\usepackage{xcolor}
                                         \\lstset{
                                         %行号
-                closins the frame after a capture
-                        numbers=left,
+                                        closins the frame after a capture
+                                        numbers=left,
                                         %背景框
                                         framexleftmargin=10mm,
                                         frame=none,
@@ -232,11 +231,12 @@ Each entry is either:
       ;; define the refile targets
       (setq org-agenda-file-note (expand-file-name "notes.org" org-agenda-dir))
       (setq org-agenda-file-gtd (expand-file-name "gtd.org" org-agenda-dir))
-      (setq org-agenda-file-journal (expand-file-name "journal.org" org-agenda-dir))
       (setq org-agenda-file-code-snippet (expand-file-name "snippet.org" org-agenda-dir))
       (setq org-default-notes-file (expand-file-name "gtd.org" org-agenda-dir))
       (setq org-agenda-files (list org-agenda-dir))
 
+      (setq org-journal-dir journal-dir)
+      
       (with-eval-after-load 'org-agenda
         (define-key org-agenda-mode-map (kbd "P") 'org-pomodoro)
         (spacemacs/set-leader-keys-for-major-mode 'org-agenda-mode
@@ -261,23 +261,19 @@ Each entry is either:
                "* %?\t%^g\n#+BEGIN_SRC %^{language}\n\n#+END_SRC")
               ("w" "work" entry (file+headline org-agenda-file-gtd "Wisonic")
                "* TODO [#A] %?\n  %i\n %U"
-               :empty-lines 1)
-              ("j" "Journal Entry"
-               entry (file+datetree org-agenda-file-journal)
-               "* %?"
                :empty-lines 1)))
 
       ;;An entry without a cookie is treated just like priority ' B '.
       ;;So when create new task, they are default 重要且紧急
       (setq org-agenda-custom-commands
             '(
-              ("w" . "任务安排")
-              ("wa" "重要且紧急的任务" tags-todo "+PRIORITY=\"A\"")
-              ("wb" "重要且不紧急的任务" tags-todo "-Weekly-Monthly-Daily+PRIORITY=\"B\"")
-              ("wc" "不重要且紧急的任务" tags-todo "+PRIORITY=\"C\"")
+              ("w" . "Task Schedule")
+              ("wa" "Important and urgent tasks" tags-todo "+PRIORITY=\"A\"")
+              ("wb" "Important and not urgent tasks" tags-todo "-Weekly-Monthly-Daily+PRIORITY=\"B\"")
+              ("wc" "Not important and urgent tasks" tags-todo "+PRIORITY=\"C\"")
               ("b" "Blog" tags-todo "BLOG")
               ("p" . "项目安排")
-              ("pw" tags-todo "PROJECT+WORK+CATEGORY=\"cocos2d-x\"")
+              ("pw" tags-todo "PROJECT+WORK+CATEGORY=\"Wisonic\"")
               ("pl" tags-todo "PROJECT+DREAM+CATEGORY=\"zorowk\"")
               ("W" "Weekly Review"
                ((stuck "") ;; review stuck projects as designated by org-stuck-projects
