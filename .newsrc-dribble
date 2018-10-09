@@ -1,0 +1,3 @@
+(gnus-group-change-level "nndraft:drafts" 1 9 nil t)
+(gnus-group-set-info '("nndraft:drafts" 1 nil nil (nndraft "")))
+(setq gnus-topic-topology '(("Gnus" visible) (("misc" visible))))

@@ -1,0 +1,15 @@
+#
+# Folder definition file
+# This file is generated automatically by Wanderlust/2.10.1 (Watching The Wheels).
+#
+# If you edit this file by hand, be sure that comment lines
+# will be washed out by wl-fldmgr.
+#
+
+%inbox  "收件箱"
+%Sent   "已发送"
+%Trash  "已删除" 
+%Junk   "垃圾箱"
+%Drafts "草稿箱"
+
+# petname definition (access group, folder in access group)
