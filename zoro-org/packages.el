@@ -31,7 +31,6 @@
 
 (defconst zoro-org-packages
   '((org :location built-in)
-    org-pomodoro
     deft)
   "The list of Lisp packages required by the zoro-org layer.
 
@@ -59,13 +58,6 @@ Each entry is either:
 
       - A list beginning with the symbol `recipe' is a melpa
         recipe.  See: https://github.com/milkypostman/melpa#recipe-format")
-(defun zoro-org/post-init-org-pomodoro ()
-  (progn
-    (add-hook 'org-pomodoro-finished-hook '(lambda () (zorowk/growl-notification "Pomodoro Finished" "☕ Have a break!" t)))
-    (add-hook 'org-pomodoro-short-break-finished-hook '(lambda () (zorowk/growl-notification "Short Break" "🐝 Ready to Go?" t)))
-    (add-hook 'org-pomodoro-long-break-finished-hook '(lambda () (zorowk/growl-notification "Long Break" " 💪 Ready to Go?" t)))
-    ))
-
 (defun zoro-org/post-init-org()
   (add-hook 'org-mode-hook (lambda () (spacemacs/toggle-line-numbers-off)) 'append)
   (with-eval-after-load 'org
@@ -103,11 +95,11 @@ Each entry is either:
       (org-crypt-use-before-save-magic)
 
       ;; 設定要加密的 tag 標籤為 secret
-      (setq org-crypt-tag-matcher "secret")
+      (setq org-crypt-tag-matcher "SECRET")
 
       ;; 避免 secret 這個 tag 被子項目繼承 造成重複加密
       ;; (但是子項目還是會被加密喔)
-      (setq org-tags-exclude-from-inheritance (quote ("secret")))
+      (setq org-tags-exclude-from-inheritance (quote ("SECRET")))
 
       ;; 用於加密的 GPG 金鑰
       ;; 可以設定任何 ID 或是設成 nil 來使用對稱式加密 (symmetric encryption)
@@ -121,6 +113,7 @@ Each entry is either:
       (setq org-clock-in-switch-to-state "STARTED")
       ;; Save clock data and notes in the LOGBOOK drawer
       (setq org-clock-into-drawer t)
+      (setq org-log-into-drawer t)
       ;; Removes clocked tasks with 0:00 duration
       (setq org-clock-out-remove-zero-time-clocks t) ;; Show the clocked-in task - if any - in the header line
 
@@ -156,7 +149,6 @@ Each entry is either:
                                         \\usepackage{xcolor}
                                         \\lstset{
                                         %行号
-                                        closins the frame after a capture
                                         numbers=left,
                                         %背景框
                                         framexleftmargin=10mm,
@@ -194,17 +186,16 @@ Each entry is either:
       (setq org-default-properties (cons "RESET_SUBTASKS" org-default-properties))
 
       (setq org-plantuml-jar-path
-            (expand-file-name "/usr/share/plantuml/plantuml.jar"))
+            (expand-file-name "C:/Users/Administrator/AppData/Roaming/graphviz/plantuml.jar"))
 
       (setq org-ditaa-jar-path
-            (expand-file-name "/usr/share/ditaa/ditaa.jar"))
+            (expand-file-name "C:/Users/Administrator/AppData/Roaming/graphviz/ditaa.jar"))
 
 
       (org-babel-do-load-languages
        'org-babel-load-languages
        '((perl . t)
          (ruby . t)
-         (sh . t)
          (dot . t)
          (js . t)
          (latex .t)
@@ -235,8 +226,6 @@ Each entry is either:
       (setq org-default-notes-file (expand-file-name "gtd.org" org-agenda-dir))
       (setq org-agenda-files (list org-agenda-dir))
 
-      (setq org-journal-dir journal-dir)
-      
       (with-eval-after-load 'org-agenda
         (define-key org-agenda-mode-map (kbd "P") 'org-pomodoro)
         (spacemacs/set-leader-keys-for-major-mode 'org-agenda-mode
@@ -253,14 +242,19 @@ Each entry is either:
               ("n" "notes" entry (file+headline org-agenda-file-note "Quick notes")
                "* %?\n  %i\n %U"
                :empty-lines 1)
-              ("b" "Blog Ideas" entry (file+headline org-agenda-file-note "Blog Ideas")
+              ("l" "Learn" entry (file+headline org-agenda-file-note "Learning")
                "* TODO [#B] %?\n  %i\n %U"
                :empty-lines 1)
-              ("s" "Code Snippet" entry
-               (file org-agenda-file-code-snippet)
+              ("s" "Code Snippet" entry (file org-agenda-file-code-snippet)
                "* %?\t%^g\n#+BEGIN_SRC %^{language}\n\n#+END_SRC")
               ("w" "work" entry (file+headline org-agenda-file-gtd "Wisonic")
                "* TODO [#A] %?\n  %i\n %U"
+               :empty-lines 1)
+              ("p" "Protocol" entry (file+headline org-agenda-file-note "Chrome Content")
+               "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?"
+               :empty-lines 1)
+              ("L" "Protocol Link" entry (file+headline org-agenda-file-note "Chrome Links")
+               "* %? [[%:link][%:description]] \nCaptured On: %U"
                :empty-lines 1)))
 
       ;;An entry without a cookie is treated just like priority ' B '.
@@ -272,13 +266,25 @@ Each entry is either:
               ("wb" "Important and not urgent tasks" tags-todo "-Weekly-Monthly-Daily+PRIORITY=\"B\"")
               ("wc" "Not important and urgent tasks" tags-todo "+PRIORITY=\"C\"")
               ("b" "Blog" tags-todo "BLOG")
-              ("p" . "项目安排")
+              ("p" . "Project")
               ("pw" tags-todo "PROJECT+WORK+CATEGORY=\"Wisonic\"")
               ("pl" tags-todo "PROJECT+DREAM+CATEGORY=\"zorowk\"")
               ("W" "Weekly Review"
                ((stuck "") ;; review stuck projects as designated by org-stuck-projects
                 (tags-todo "PROJECT") ;; review all projects (assuming you use todo keywords to designate projects)
                 ))))
+
+      (setq org-brain-path "C:/Users/Administrator/Dropbox/brain")
+      ;; For Evil users
+      (with-eval-after-load 'evil
+        (evil-set-initial-state 'org-brain-visualize-mode 'emacs))
+      :config
+      (setq org-id-track-globally t)
+      (setq org-id-locations-file "~/.emacs.d/.org-id-locations")
+      (push '("b" "Brain" plain (function org-brain-goto-end)
+              "* %i%?" :empty-lines 1) org-capture-templates)
+      (setq org-brain-visualize-default-choices 'all)
+      (setq org-brain-title-max-length 12)
 
       (defvar zoro-website-html-preamble
         "<div class='nav'>

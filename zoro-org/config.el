@@ -14,10 +14,14 @@
 (defvar deft-dir ""
   "deft org files locaiton")
 
+(defvar blog-admin-dir ""
+  "blog-admin files location")
+
 (setq-default
- org-agenda-dir "~/Documents/Worker"
- deft-dir "~/Documents/Worker"
- journal-dir "~/Documents/journal")
+ org-agenda-dir "~/Dropbox/worker/"
+ deft-dir "~/Dropbox/notes/"
+ blog-admin-dir "~/Dropbox/blog/"
+ journal-dir "~/Dropbox/journal/")
 
 (defun zorowk/org-ispell ()
   "Configure `ispell-skip-region-alist' for `org-mode'."

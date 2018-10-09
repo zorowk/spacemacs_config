@@ -2,7 +2,7 @@
 ;;
 ;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
 ;;
-;; Author: zoro <zoro@zoro-HP>
+;; Author:  <Administrator@PENGWENHAO>
 ;; URL: https://github.com/syl20bnr/spacemacs
 ;;
 ;; This file is not part of GNU Emacs.
@@ -30,7 +30,7 @@
 ;;; Code:
 
 (defconst zoro-email-packages
-  '(mu4e)
+  '(wanderlust)
   "The list of Lisp packages required by the zoro-email layer.
 
 Each entry is either:
@@ -58,65 +58,30 @@ Each entry is either:
       - A list beginning with the symbol `recipe' is a melpa
         recipe.  See: https://github.com/milkypostman/melpa#recipe-format")
 
-(defun zoro-email/post-init-mu4e ()
-  (progn
-    (setq mu4e-account-alist
-          '(("gmail"
-             ;; Under each account, set the account-specific variables you want.
-             (mu4e-sent-messages-behavior delete)
-             (mu4e-sent-folder "/personal/[Gmail]/.Sent Mail")
-             (mu4e-drafts-folder "/personal/[Gmail]/.Drafts")
-             (user-mail-address "near.kingzero@gmail.com")
-             (user-full-name "zorowk"))
-            ("wisonic"
-             (mu4e-sent-messages-behavior sent)
-             (mu4e-sent-folder "/personal/Sent Mail")
-             (mu4e-drafts-folder "/personal/Drafts")
-             (user-mail-address "pengwenhao@wisonic.cn")
-             (user-full-name "pengwenhao"))))
+(defun zoro-email/init-wanderlust ()
+  (with-eval-after-load 'wanderlust
+    (require 'wanderlust)
+    (setq
+     wl-stay-folder-window t                       ;; show the folder pane (left)
+     wl-folder-window-width 25                     ;; toggle on/off with 'i'
 
-    ;;; Set up some common mu4e variables
-    (setq mu4e-maildir "~/.mail"
-          mu4e-trash-folder "/Trash"
-          mu4e-refile-folder "/Archive"
-          mu4e-get-mail-command "mbsync -a"
-          mu4e-update-interval 60
-          mu4e-compose-signature-auto-include nil
-          mu4e-view-show-images t
-          mu4e-view-show-addresses t)
-
-    ;;; Mail directory shortcuts
-    (setq mu4e-maildir-shortcuts
-          '(("/worker/INBOX" . ?g)
-            ("//INBOX" . ?c)))
-
-    ;;; Bookmarks
-    (setq mu4e-bookmarks
-          `(("flag:unread AND NOT flag:trashed" "Unread messages" ?u)
-            ("date:today..now" "Today's messages" ?t)
-            ("date:7d..now" "Last 7 days" ?w)
-            ("mime:image/*" "Messages with images" ?p)
-            (,(mapconcat 'identity
-                         (mapcar
-                          (lambda (maildir)
-                            (concat "maildir:" (car maildir)))
-                          mu4e-maildir-shortcuts) " OR ")
-             "All inboxes" ?i)))
-
-    (with-eval-after-load 'mu4e-alert
-      ;; Enable Desktop notifications
-      ;; (mu4e-alert-set-default-style 'notifications)) ; For linux
-      (mu4e-alert-set-default-style 'libnotify))  ; Alternative for linux
-
-    (setq mu4e-html2text-command "/usr/bin/w3m -T text/html")
-
-                                        ; use msmtp
-    (setq message-send-mail-function 'message-send-mail-with-sendmail)
-    (setq sendmail-program "/usr/local/bin/msmtp")
-                                        ; tell msmtp to choose the SMTP server according to the from field in the outgoing email
-    (setq message-sendmail-extra-arguments '("--read-envelope-from"))
-    (setq message-sendmail-f-is-evil 't)
-
-    (setq message-kill-buffer-on-exit t)
-   ))
+     ;; hide many fields from message buffers
+     wl-message-ignored-field-list '("^.*:")
+     wl-message-visible-field-list
+     '("^\\(To\\|Cc\\):"
+       "^Subject:"
+       "^\\(From\\|Reply-To\\):"
+       "^Organization:"
+       "^Message-Id:"
+       "^\\(Posted\\|Date\\):"
+       )
+     wl-message-sort-field-list
+     '("^From"
+       "^Organization:"
+       "^X-Attribution:"
+       "^Subject"
+       "^Date"
+       "^To"
+       "^Cc")))
+  )
 ;;; packages.el ends here
