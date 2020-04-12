@@ -1,84 +1,187 @@
+;; mode:-*-emacs-lisp-*-
+;; wanderlust 
+(setq 
+wl-plugged t
+elmo-maildir-folder-path "/home/zoro/Mail/"
+elmo-mh-folder-path "/home/zoro/Mail/"
+elmo-message-fetch-confirm t
+elmo-message-fetch-threshold 250000
+
+wl-stay-folder-window t                       ;; show the folder pane (left)
+wl-folder-window-width 25                     ;; toggle on/off with 'i'
+elmo-imap4-use-modified-utf7 t
+wl-thread-insert-opened t
+wl-thread-indent-level 1
+wl-thread-have-younger-brother-str "+"
+wl-thread-youngest-child-str       "+"
+wl-thread-vertical-str             "|"
+wl-thread-horizontal-str           "-"
+wl-thread-space-str                " "
+
+;; note: all below are dirs (Maildirs) under elmo-maildir-folder-path
+;; the '.'-prefix is for marking them as maildirs
+wl-fcc ".sent"                       ;; sent msgs go to the "sent"-folder
+wl-fcc-force-as-read t               ;; mark sent messages as read
+wl-default-folder ".inbox"
+wl-draft-folder ".draft"             ;; store drafts in 'postponed'
+wl-trash-folder ".trash"             ;; put trash in 'trash'
+wl-spam-folder ".trash"              ;; ...spam as well
+
+;; check this folder periodically, and update modeline
+wl-biff-check-folder-list '(".inbox") ;; check every 180 seconds
+wl-biff-check-interval 5
+
+;; User Email addresses
+wl-user-mail-address-list nil
+
+wl-draft-reply-buffer-style 'keep
+wl-interactive-send nil
+wl-interactive-exit nil
+
+;; Windows and decoration
+wl-folder-use-frame nil
+wl-highlight-body-too t
+wl-use-highlight-mouse-line nil
+wl-show-plug-status-on-modeline t
+wl-message-window-size '(1 . 4)
+
+mime-view-text/html-previewer 'shr
+shr-use-colors nil
+)
+
+(setq global-mode-string
+      (cons
+       '(wl-modeline-biff-status
+         wl-modeline-biff-state-on
+         wl-modeline-biff-state-off)
+       global-mode-string))
+
+;; Use wanderlust for default compose-mail
+(if (boundp 'mail-user-agent)
+    (setq mail-user-agent 'wl-user-agent))
+(if (fboundp 'define-mail-user-agent)
+    (define-mail-user-agent
+      'wl-user-agent
+      'wl-user-agent-compose
+      'wl-draft-send
+      'wl-draft-kill
+      'mail-send-hook))
+
+;; BUILD the folder tree automatically
+;; Note: if you change the hierarchy and want to rebuild the tree do
+;; rm -rf ~/Emacs/Wanderlust/Elmo/folder
+(setq wl-folder-hierarchy-access-folders
+      '("^.\\([^/.]+[/.]\\)*[^/.]+\\(:\\|@\\|$\\)"
+    "^-[^.]*\\(:\\|@\\|$\\)"
+    "^@$"
+   "^'$"))
+
+;; ----------------------------------------------------------------------------
+;;; Summary
+(setq wl-auto-select-next 'unread
+      wl-summary-width nil
+      wl-summary-weekday-name-lang "en"
+      wl-summary-showto-folder-regexp ".Sent.*"
+      ;;wl-summary-line-format "%n%T%P%M/%D(%W)%h:%m %t%[%17(%c %f%) %] %s"
+      wl-summary-line-format "%T%P%M/%D(%W)%h:%m %[ %17f %]%[%1@%] %t%C%s"
+
+      ;; Summary threads
+      wl-thread-insert-opened t
+      wl-thread-open-reading-thread t
+      )
+
+(setq
+ wl-forward-subject-prefix "Fwd: " )    ;; use "Fwd: " not "Forward: "
+
+;;; Message:
+(setq mime-view-mailcap-files '("~/.emacs.d/wanderlust/mailcap")
+      wl-message-ignored-field-list '("^.*:")
+      wl-message-visible-field-list
+      '("^\\(To\\|Cc\\):"
+        "^Subject:"
+        "^\\(From\\|Reply-To\\):"
+        "^Organization:"
+        "^X-Attribution:"
+        "^\\(Posted\\|Date\\):"
+        )
+      wl-message-sort-field-list
+      '("^From"
+        "^Organization:"
+        "^X-Attribution:"
+        "^Subject"
+        "^Date"
+        "^To"
+        "^Cc"))
+
+;; ----------------------------------------------------------------------------
+;;; Configure BBDB to manage Email addresses
+
+(require 'ebdb-wl)
+
+;; ----------------------------------------------------------------------------
+;;; Configure recently used Email addresses
+
+
+;; added hook.
+(add-hook 'bbdb-notice-hook 'bbdb-auto-notes-hook)
+
+(defun fetchmail-fetch ()
+  (interactive)
+  (shell-command "proxychains fetchmail -s -k -f ~/.fetchmailrc")
+  )
+ (global-set-key "\C-x\M-m" 'fetchmail-fetch)
+
+(setq wl-biff-notify-hook '(ding))
+
+
+;; xxxxxxxxxxxxxxx Set the templates xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+(setq wl-template-alist
+    '(
+     ("gmail"                            ; Gmail
+     (wl-from . "zorowk <near.kingzero@gmail.com>")
+     ("From" . wl-from)
+
 ;; SMTP
-(setq wl-smtp-connection-type 'starttls
-      wl-smtp-posting-port 465
-      wl-smtp-authenticate-type "login"
-      wl-smtp-posting-user "username"
-      wl-smtp-posting-server "smtp.exmail.qq.com"
-      wl-local-domain "exmail.qq.com"
-      wl-message-id-domain "smtp.exmail.qq.com")  
-
-;; IMAP
-(setq elmo-imap4-default-server "imap.exmail.qq.com"
-      elmo-imap4-default-user "username@wisonic.cn"
-      elmo-imap4-default-authenticate-type 'clear
-      elmo-imap4-default-port '993
-      elmo-imap4-default-stream-type 'ssl)
-
-;; 送信设置
-(setq wl-from "pengwenhao <username@componay.cn>"
-
-      ;; All system folders (draft, trash, spam, etc) are placed in the
-      ;; [Gmail]-folder, except inbox. "%" means it's an IMAP-folder
-      wl-default-folder "%inbox"
-      wl-draft-folder   "%Drafts"
-      wl-trash-folder   "%Trash"
-      ;; The below is not necessary when you send mail through Gmail's SMTP server,
-      ;; see https://support.google.com/mail/answer/78892?hl=en&rd=1
-      wl-fcc            "%Sent"
-
-      ;; Mark sent messages as read (sent messages get sent back to you and
-      ;; placed in the folder specified by wl-fcc)
-      wl-fcc-force-as-read            t
-      wl-draft-always-delete-myself   t
-      wl-message-id-use-message-from  t
-      wl-interactive-send             t
-      ;; 屏幕将像普通的邮件程序一样位于3窗格中
-      wl-stay-folder-window           t
-
-      ;; For auto-completing foldernames
-      wl-default-spec "%")
-
-;; 在发送文件夹中显示汇总目的地的设定
-(setq wl-summary-showto-folder-regexp "Sent")
-
-;; 过滤掉邮件头中不需要显示的内容
-(setq wl-message-ignored-field-list
-  '(".*Received:" ".*Path:" ".*Id:" "^References:"
-    "^Replied:" "^Errors-To:"
-    "^Lines:" "^Sender:" ".*Host:" "^Xref:"
-    "^Content-Type:" "^Precedence:"
-    "^Status:" "^X-.*:"
-    "^Content-.*:" "^MIME-Version:"
-    "^Delivered-To:"
-   )
- )
-
-;; 相反你将看到的内容
-(setq wl-message-visible-field-list
-  '("X-Mailer.*:"
-    "^X-Spam-Stat:"
+      (wl-smtp-connection-type . 'starttls)
+      (wl-smtp-posting-port . 587)
+      (wl-smtp-authenticate-type . "plain")
+      (wl-smtp-posting-user . "near.kingzero")
+      (wl-smtp-posting-server . "smtp.gmail.com")
+      (wl-local-domain . "gmail.com")
+      (wl-message-id-domain . "smtp.gmail.com")
+     ;;(signature-file-name . "/mnt/usb/root/.signature")
+     )
     ))
+;; xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-;; 添加用于消息排序的标题
-(setq elmo-msgdb-extra-fields
-      '("X-Spam-Stat"
-       ))
+;; xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+;; Automatically select the correct template based on which folder I'm visiting
+(setq wl-draft-config-matchone t) ;; If non-nil, applied only one element of `wl-draft-config-alist'.
 
-;; 邮件使用标题排序
-(setq wl-refile-rule-alist
-        '(("X-Spam-Stat"
-                ("Yes" . "%Junk")
-          )))
+(setq wl-draft-config-alist
+      '(
+	( ; If I start a draft from my work e-mail folder and I'm using my
+					; personal computer (from home) use the template "Work-From-Home". I
+					; use a two different templates for my work E-Mail because I don't
+					; have access to the smtp server of my work when I'm at home. But
+					; since I can ssh to it i redirect a port to be able to sent e-mail
+					; from home though the smtp server of my work
+	 ;;  (and (string-match ".*WORK" wl-draft-parent-folder) (string-match "dtripathi" system-name))
+	 ;; (template . "Work-From-Home")
+	 ;; )
+	 ;;  ( ; If I start a draft from my work e-mail folder and I'm using my
+					; work computer, use the "Work" template
+	 
+	 (and (string-match ".*OTHERS.*\\|.*Managers.*\\|.*Team.*" wl-draft-parent-folder) )
+	 (template . "Work")
+           )
+	( ;; If I start a draft from any other folder, use the "gmail" template.
+	 (not (string-match ".*OTHERS.*\\|.*Managers.*\\|.*Team.*" wl-draft-parent-folder))
+	 (template . "gmail")
+	 )
+	))
 
-;;不要再发送时分割大量消息
-(setq mime-edit-split-message nil)
-
-;; 使用简短的邮件客户端标志
-(setq wl-generate-mailer-string-function 
-        'wl-generate-user-agent-string-1)
-
-;; 信件提示
-(setq wl-biff-check-folder-list '("%inbox"))
-
-;; 显示摘要的格式， 取消线程显示默认值
-(setq wl-summary-default-view 'sequence)
+;; Apply wl-draft-config-alist as soon as you enter in a draft buffer. Without
+;; this wanderlust would apply it only when actually sending the e-mail.
+(add-hook 'wl-mail-setup-hook 'wl-draft-config-exec)
+;; xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

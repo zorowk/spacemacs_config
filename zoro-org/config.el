@@ -21,7 +21,8 @@
  org-agenda-dir "~/Dropbox/worker/"
  deft-dir "~/Dropbox/notes/"
  blog-admin-dir "~/Dropbox/blog/"
- journal-dir "~/Dropbox/journal/")
+ journal-dir "~/Dropbox/journal/"
+ brain-dir "~/Dropbox/brain")
 
 (defun zorowk/org-ispell ()
   "Configure `ispell-skip-region-alist' for `org-mode'."

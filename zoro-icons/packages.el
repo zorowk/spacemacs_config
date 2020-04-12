@@ -30,9 +30,7 @@
 ;;; Code:
 
 (defconst zoro-icons-packages
-  '(all-the-icons
-    neotree
-    all-the-icons-dired)
+  '(all-the-icons-dired)
   "The list of Lisp packages required by the zoro-icons layer.
 
 Each entry is either:
@@ -59,13 +57,6 @@ Each entry is either:
 
       - A list beginning with the symbol `recipe' is a melpa
         recipe.  See: https://github.com/milkypostman/melpa#recipe-format")
-(defun zoro-icons/init-all-the-icons ()
-  "Initialize all-the-incons."
-  (use-package all-the-icons
-    :defer t))
-
-(defun zoro-icons/post-init-neotree ()
-  (setq neo-theme 'icons))
 
 (defun zoro-icons/init-all-the-icons-dired ()
   "Initialize all-the-incons for dired."

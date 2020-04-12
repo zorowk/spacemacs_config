@@ -177,30 +177,19 @@
       (insert output-string))
     output-string))
 
-(defun zorowk/retrieve-chrome-current-tab-url()
-  "Get the URL of the active tab of the first window"
-  (interactive)
-  (let ((result (do-applescript
-                 (concat
-                  "set frontmostApplication to path to frontmost application\n"
-                  "tell application \"Google Chrome\"\n"
-                  "	set theUrl to get URL of active tab of first window\n"
-                  "	set theResult to (get theUrl) \n"
-                  "end tell\n"
-                  "activate application (frontmostApplication as text)\n"
-                  "set links to {}\n"
-                  "copy theResult to the end of links\n"
-                  "return links as string\n"))))
-    (format "%s" (s-chop-suffix "\"" (s-chop-prefix "\"" result)))))
+(defun zorowk/libnotify (title body)
+  "Notify with TITLE, BODY via `libnotify'."
+  (call-process "notify-send" nil 0 nil
+		            title body
+                "-t" "8000"
+                "-a" "Emacs"
+		            "-i" "/usr/share/icons/hicolor/32x32/apps/emacs.png"
+		            "-u" "normal"
+		            "-c" "emacs.message"))
 
-;; http://blog.lojic.com/2009/08/06/send-growl-notifications-from-carbon-emacs-on-osx/
-(defun zorowk/growl-notification (title message &optional sticky)
-  "Send a Growl notification"
-  (do-applescript
-   (format "tell application \"GrowlHelperApp\" \n
-              notify with name \"Emacs Notification\" title \"%s\" description \"%s\" application name \"Emacs.app\" sticky \"%s\"
-              end tell
-              "
-           title
-           message
-           (if sticky "yes" "no"))))
+(defun zorowk/pomodoro-notification ()
+  "show notifications when pomodoro end"
+  (progn (add-hook 'org-pomodoro-finished-hook '(lambda () (zorowk/libnotify "Pomodoro Finished" "☕️ Have a break!")))
+         (add-hook 'org-pomodoro-short-break-finished-hook '(lambda () (zorowk/libnotify "Short Break" "🐝 Ready to Go?")))
+         (add-hook 'org-pomodoro-long-break-finished-hook '(lambda () (zorowk/libnotify "Long Break" "💪 Ready to Go?")))))
+

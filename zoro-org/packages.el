@@ -30,8 +30,10 @@
 ;;; Code:
 
 (defconst zoro-org-packages
-  '((org :location built-in)
+  '(org
     deft
+    org-pomodoro
+    org-brain
     (blog-admin :location (recipe
                            :fetcher github
                            :repo "codefalling/blog-admin")))
@@ -61,6 +63,7 @@ Each entry is either:
 
       - A list beginning with the symbol `recipe' is a melpa
         recipe.  See: https://github.com/milkypostman/melpa#recipe-format")
+
 (defun zoro-org/init-blog-admin ()
   (use-package blog-admin
     :defer t
@@ -75,6 +78,24 @@ Each entry is either:
             )
       (add-hook 'blog-admin-backend-after-new-post-hook 'find-file)
       )))
+
+(defun zoro-org/post-init-org-brain()
+  (with-eval-after-load 'org-brain
+    (progn
+      (setq org-brain-path "~/Dropbox/brain")
+      (with-eval-after-load 'evil
+        (evil-set-initial-state 'org-brain-visualize-mode 'emacs))
+      :config
+      (setq org-id-track-globally t)
+      (setq org-id-locations-file "~/.emacs.d/.org-id-locations")
+      (push '("b" "Brain" plain (function org-brian-goto-end)
+              "* %i%?" :empty-lines 1) org-capture-templates)
+      (setq org-brain-visualize-default-choices 'all)
+      (setq org-brain-title-max-length 16)
+      )))
+
+(defun zoro-org/post-init-org-pomodoro ()
+  (zorowk/pomodoro-notification))
 
 (defun zoro-org/post-init-org()
   (add-hook 'org-mode-hook (lambda () (spacemacs/toggle-line-numbers-off)) 'append)
@@ -103,6 +124,7 @@ Each entry is either:
       (setq org-agenda-window-setup 'current-window)
       (setq org-log-done t)
       (setq org-startup-indented t)
+      (setq org-html-validation-link nil)
 
       ;; 加密文章
       ;; "http://coldnew.github.io/blog/2013/07/13_5b094.html"
@@ -144,8 +166,18 @@ Each entry is either:
                                                  'zorowk/org-insert-src-block)))
 
       (require 'ox-publish)
-      (add-to-list 'org-latex-classes '("ctexart" "\\documentclass[11pt]{ctexart}
+      (setq org-latex-listings t)
+      (add-to-list 'org-latex-packages-alist
+                   '("AUTO" "inputenc" t))
+      (add-to-list 'org-latex-classes '("ctexart" "\\documentclass[10pt]{ctexart}
+                                        \\usepackage[slantfont, boldfont]{xeCJK}
                                         [NO-DEFAULT-PACKAGES]
+                                        [PACKAGES]
+                                        \\setCJKmainfont{Noto Sans CJK SC}
+                                        \\parindent 2em
+                                        \\setmainfont{Times New Roman}
+                                        \\setsansfont{Times New Roman}
+                                        \\setmonofont{Source Code Pro}
                                         \\usepackage[utf8]{inputenc}
                                         \\usepackage[T1]{fontenc}
                                         \\usepackage{fixltx2e}
@@ -165,25 +197,35 @@ Each entry is either:
                                         \\tolerance=1000
                                         \\usepackage{listings}
                                         \\usepackage{xcolor}
-                                        \\lstset{
-                                        %行号
-                                        numbers=left,
-                                        %背景框
-                                        framexleftmargin=10mm,
-                                        frame=none,
-                                        %背景色
-                                        %backgroundcolor=\\color[rgb]{1,1,0.76},
-                                        backgroundcolor=\\color[RGB]{245,245,244},
-                                        %样式
-                                        keywordstyle=\\bf\\color{blue},
-                                        identifierstyle=\\bf,
-                                        numberstyle=\\color[RGB]{0,192,192},
-                                        commentstyle=\\it\\color[RGB]{0,96,96},
-                                        stringstyle=\\rmfamily\\slshape\\color[RGB]{128,0,0},
-                                        %显示空格
-                                        showstringspaces=false
-                                        }
-                                        "
+                                        \\usepackage{color}
+                                        \\usepackage{lstautogobble}
+                                        \\usepackage{zi4}
+                                        \\definecolor{bluekeywords}{rgb}{0.13, 0.13, 1}
+                                        \\definecolor{greencomments}{rgb}{0, 0.5, 0}
+                                        \\definecolor{redstrings}{rgb}{0.9, 0, 0}
+                                        \\definecolor{graynumbers}{rgb}{0.5, 0.5, 0.5}
+                                        \\defaultfontfeatures{Mapping=tex-text}
+                                        \\XeTeXlinebreaklocale \"zh\"
+                                        \\XeTeXlinebreakskip = 0pt plus 1pt minus 0.1pt
+                                        \\lstset{autogobble,
+                                                 columns=fullflexible,
+                                                 showspaces=false,
+                                                 showtabs=false,
+                                                 breaklines=true,
+                                                 showstringspaces=false,
+                                                 breakatwhitespace=true,
+                                                 escapeinside={(*@}{@*)},
+                                                 commentstyle=\\color{greencomments},
+                                                 keywordstyle=\\color{bluekeywords},
+                                                 stringstyle=\\color{redstrings},
+                                                 numberstyle=\\color{graynumbers},
+                                                 basicstyle=\\ttfamily\\footnotesize,
+                                                 frame=l,
+                                                 framesep=12pt,
+                                                 xleftmargin=12pt,
+                                                 tabsize=4,
+                                                 captionpos=b}
+                                        [EXTRA]"
                                         ("\\section{%s}" . "\\section*{%s}")
                                         ("\\subsection{%s}" . "\\subsection*{%s}")
                                         ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -192,23 +234,22 @@ Each entry is either:
 
       (setq org-latex-default-class "ctexart")
       (setq org-latex-pdf-process
-            '(
-              "xelatex -interaction nonstopmode -output-directory %o %f"
-              "xelatex -interaction nonstopmode -output-directory %o %f"
-              "xelatex -interaction nonstopmode -output-directory %o %f"
-              "rm -fr %b.out %b.log %b.tex auto"))
-
-      (setq org-latex-listings t)
+            '("xelatex -interaction nonstopmode -shell-escape -output-directory %o %f"
+	            "bibtex %b"
+              "makeindex %b"
+	            "xelatex -interaction nonstopmode --shell-escape -output-directory %o %f"
+	            "xelatex -interaction nonstopmode -shell-escape -output-directory %o %f"
+              "rm -rf %b.out %b.log %b.tex %b.bbl auto"))
 
       ;;reset subtask
       (setq org-default-properties (cons "RESET_SUBTASKS" org-default-properties))
 
+      (setq org-startup-with-inline-images t)
+      ;;(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
+
       (setq org-plantuml-jar-path
-            (expand-file-name "C:/Users/Administrator/AppData/Roaming/graphviz/plantuml.jar"))
-
-      (setq org-ditaa-jar-path
-            (expand-file-name "C:/Users/Administrator/AppData/Roaming/graphviz/ditaa.jar"))
-
+            (expand-file-name "/usr/share/java/plantuml/plantuml.jar"))
+      (setq org-ditaa-jar-path "/usr/share/java/ditaa/ditaa-0.11.jar")
 
       (org-babel-do-load-languages
        'org-babel-load-languages
@@ -221,7 +262,8 @@ Each entry is either:
          (emacs-lisp . t)
          (plantuml . t)
          (C . t)
-         (ditaa . t)))
+         (ditaa . t)
+         (gnuplot . t)))
 
       (require 'ox-md nil t)
       ;; copy from chinese layer
@@ -292,7 +334,26 @@ Each entry is either:
                 (tags-todo "PROJECT") ;; review all projects (assuming you use todo keywords to designate projects)
                 ))))
 
-      (setq org-brain-path "C:/Users/Administrator/Dropbox/brain")
+      (setq org-brain-path "~/Dropbox/brain")
+
+      (setq org-confirm-babel-evaluate nil
+            org-src-fontify-natively t
+            org-src-tab-acts-natively t)
+      (setq spaceline-org-clock-p t)
+
+      (setq org-ref-default-bibliography '("~/Dropbox/bibliography/references.bib")
+            org-ref-pdf-directory "~/Dropbox/bibliography/book"
+            org-ref-bibliography-notes "~/Dropbox/bibliography/books.org")
+
+      (setq bibtex-completion-bibliography "~/Dropbox/bibliography/references.bib"
+            bibtex-completion-library-path "~/Dropbox/bibliography/book"
+            bibtex-completion-notes-path "~/Dropbox/bibliography/bibnotes.org")
+
+      (setq org-ref-open-pdf-function
+            (lambda (fpath)
+              (start-process "zathura" "*helm-bibtex-zathura*" "/usr/bin/zathura" fpath)))
+      (setq powerline-height 20)
+
       ;; For Evil users
       (with-eval-after-load 'evil
         (evil-set-initial-state 'org-brain-visualize-mode 'emacs))

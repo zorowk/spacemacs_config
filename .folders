@@ -6,10 +6,13 @@
 # will be washed out by wl-fldmgr.
 #
 
-%inbox  "收件箱"
-%Sent   "已发送"
-%Trash  "已删除" 
-%Junk   "垃圾箱"
-%Drafts "草稿箱"
+GMAIL {
+   .inbox           "Inbox"
+   .starred         "Starred"
+   .important       "Important"
+   .sent		        "Sent"
+   .draft           "Drafts"
+   .trash           "Trash"
+}
 
 # petname definition (access group, folder in access group)

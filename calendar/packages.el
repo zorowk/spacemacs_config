@@ -19,7 +19,7 @@
     :defer t
     :commands (cfw:open-calendar-buffer)
     :init
-    (spacemacs/set-leader-keys "aC" 'cfw:open-calendar-buffer)
+    (spacemacs/set-leader-keys "aL" 'cfw:open-calendar-buffer)
     :config
     (progn
       (define-key cfw:calendar-mode-map (kbd "SPC") 'spacemacs-cmds)
@@ -33,7 +33,7 @@
     :defer t
     :commands (cfw:open-org-calendar)
     :init
-    (spacemacs/set-leader-keys "aoC" 'cfw:open-org-calendar)
+    (spacemacs/set-leader-keys "aoL" 'cfw:open-org-calendar)
     :config
     (progn
       (define-key cfw:org-schedule-map (kbd "SPC") 'spacemacs-cmds)

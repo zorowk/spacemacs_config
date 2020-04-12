@@ -57,13 +57,13 @@ Each entry is either:
 
       - A list beginning with the symbol `recipe' is a melpa
         recipe.  See: https://github.com/milkypostman/melpa#recipe-format")
-
 (defun zoro-email/init-wanderlust ()
   (with-eval-after-load 'wanderlust
     (require 'wanderlust)
     (setq
+     wl-auto-save-drafts-interval nil
      wl-stay-folder-window t                       ;; show the folder pane (left)
-     wl-folder-window-width 25                     ;; toggle on/off with 'i'
+     wl-folder-window-width 32                     ;; toggle on/off with 'i'
 
      ;; hide many fields from message buffers
      wl-message-ignored-field-list '("^.*:")

@@ -1,4 +1,4 @@
-;; -*- mode: emacs-lisp -*-
+;; -*- mode: emacs-lisp; lexical-binding: t -*-
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
 
@@ -33,69 +33,96 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(asciidoc
-     html
-     typescript
-     windows-scripts
+   '(
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
      ;; `M-m f e R' (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     helm
-     auto-completion
+     graphviz
+     asciidoc
+     dash
+     (auto-completion :variables
+                      auto-completion-enable-sort-by-usage t
+                      auto-completion-enable-snippets-in-popup t
+                      :disabled-for org markdown)
      better-defaults
-     emacs-lisp
-     git
+     (git :variables
+          git-magit-status-fullscreen t
+          magit-push-always-verify nil
+          magit-save-repository-buffers 'dontask
+          magit-revert-buffers 'silent
+          magit-refs-show-commit-count 'all
+          magit-revision-show-gravatars nil)
+     github
+     bm
+     finance
+     json
+     asm
+     colors
+     prodigy
+     helm
      (markdown :variables
                markdown-live-preview-engine 'vmd)
-     neotree
+     treemacs
+     journal
+     zoro-ebdb
      zoro-icons
      zoro-email
      zoro-org
-     journal
+     zoro-program
+     html
+     (javascript :variables
+                 javascript-backend 'lsp)
+     (typescript :variables
+                 typescript-fmt-on-save nil
+                 typescript-fmt-tool 'typescript-formatter
+                 typescript-backend 'lsp)
+     ;;orgwiki
+     calendar
      deft
      ibuffer
      imenu-list
-     cmake
-     debug
-     fasd
-     rebox
      epub
      pdf
-     sql
+     erc
+     fasd
+     ;;(elfeed :variables rmh-elfeed-org-files (list "~/Dropbox/personal/elfeed.org"))
+     multiple-cursors
      (org :variables
           org-enable-github-support t
-          org-enable-org-journal-support t)
-     (chinese :variables
-              chinese-enable-fcitx t
-              chinese-enable-youdao-dict t)
+          org-enable-org-journal-support t
+          org-enable-epub-support t
+          org-projectile-file "TODOs.org")
      (c-c++ :variables
             c-c++-default-mode-for-headers 'c++-mode
-            c-c++-enable-clang-support t
-            c-c++-enable-rtags-support t
-            c-c++-enable-rtags-support 'no-completion
-            c-c++-enable-google-style t
-            c-c++-enable-google-style t)
+            c-c++-backend 'lsp-ccls
+            c-c++-lsp-executable (file-truename "/usr/bin/ccls")
+            c-c++-lsp-cache-dir "~/.emacs.d/.cache/lsp-ccls")
+     (go :variables
+         go-backend 'lsp
+         go-tab-width 4
+         go-format-before-save t
+         go-use-golangci-lint t
+         gofmt-command "goimports"
+         go-use-test-args "-race -timeout 10s"
+         godoc-at-point-function 'godoc-gogetdoc
+         )
+     lsp
+     cmake
+     emacs-lisp
+     dap
      semantic
-     (gtags :variables
-            gtags-enable-by-default t)
+     (gtags :disabled-for clojure emacs-lisp javascript latex python shell-scripts)
      (python :variables
-             python-test-runner 'pytest
-             python-enable-yapf-format-on-save t
-             python-sort-imports-on-save t)
-     (latex :variables
-            latex-build-command "xelatex"
-            latex-enable-auto-fill t)
+             python-test-runner '(nose pytest)
+             python-backend 'lsp
+             python-lsp-server 'pyls)
+     latex
      bibtex
-     graphviz
-     plantuml
-     (erc :variables
-          erc-enable-notifications t
-          erc-enable-sasl-auth t)
      (shell :variables
-             shell-default-height 30
-             shell-default-position 'bottom)
+            shell-default-height 30
+            shell-default-position 'bottom)
      syntax-checking
      version-control
      )
@@ -107,7 +134,7 @@ This function should only modify configuration layer settings."
    ;; To use a local version of a package, use the `:location' property:
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
-   dotspacemacs-additional-packages '(qml-mode)
+   dotspacemacs-additional-packages '(cdlatex org-mind-map)
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -136,12 +163,12 @@ It should only modify the values of Spacemacs settings."
    ;; to compile Emacs 27 from source following the instructions in file
    ;; EXPERIMENTAL.org at to root of the git repository.
    ;; (default nil)
-   dotspacemacs-enable-emacs-pdumper nil
+   dotspacemacs-enable-emacs-pdumper t
 
-   ;; File path pointing to emacs 27.1 executable compiled with support
-   ;; for the portable dumper (this is currently the branch pdumper).
-   ;; (default "emacs-27.0.50")
-   dotspacemacs-emacs-pdumper-executable-file "emacs-27.0.50"
+   ;; Name of executable file pointing to emacs 27+. This executable must be
+   ;; in your PATH.
+   ;; (default "emacs")
+   dotspacemacs-emacs-pdumper-executable-file "emacs"
 
    ;; Name of the Spacemacs dump file. This is the file will be created by the
    ;; portable dumper in the cache directory under dumps sub-directory.
@@ -197,16 +224,13 @@ It should only modify the values of Spacemacs settings."
    ;; (default 'vim)
    dotspacemacs-editing-style 'vim
 
-   ;; If non-nil output loading progress in `*Messages*' buffer. (default nil)
-   dotspacemacs-verbose-loading nil
-
    ;; Specify the startup banner. Default value is `official', it displays
    ;; the official spacemacs logo. An integer value is the index of text
    ;; banner, `random' chooses a random text banner in `core/banners'
    ;; directory. A string value must be a path to an image format supported
    ;; by your Emacs build.
    ;; If the value is nil then no banner is displayed. (default 'official)
-   dotspacemacs-startup-banner 'official
+   dotspacemacs-startup-banner '997
 
    ;; List of items to show in startup buffer or an association list of
    ;; the form `(list-type . list-size)`. If nil then it is disabled.
@@ -220,6 +244,11 @@ It should only modify the values of Spacemacs settings."
    ;; True if the home buffer should respond to resize events. (default t)
    dotspacemacs-startup-buffer-responsive t
 
+   ;; Default major mode for a new empty buffer. Possible values are mode
+   ;; names such as `text-mode'; and `nil' to use Fundamental mode.
+   ;; (default `text-mode')
+   dotspacemacs-new-empty-buffer-major-mode 'text-mode
+
    ;; Default major mode of the scratch buffer (default `text-mode')
    dotspacemacs-scratch-mode 'text-mode
 
@@ -230,15 +259,16 @@ It should only modify the values of Spacemacs settings."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(gruvbox-dark-medium
+   dotspacemacs-themes '(afternoon
+                         gruvbox-dark-medium
                          monokai)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
-   ;; `all-the-icons', `custom', `vim-powerline' and `vanilla'. The first three
-   ;; are spaceline themes. `vanilla' is default Emacs mode-line. `custom' is a
-   ;; user defined themes, refer to the DOCUMENTATION.org for more info on how
-   ;; to create your own spaceline theme. Value can be a symbol or list with\
-   ;; additional properties.
+   ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
+   ;; first three are spaceline themes. `doom' is the doom-emacs mode-line.
+   ;; `vanilla' is default Emacs mode-line. `custom' is a user defined themes,
+   ;; refer to the DOCUMENTATION.org for more info on how to create your own
+   ;; spaceline theme. Value can be a symbol or list with additional properties.
    ;; (default '(spacemacs :separator wave :separator-scale 1.5))
    dotspacemacs-mode-line-theme '(spacemacs :separator nil :separator-scale 1.5)
 
@@ -246,11 +276,10 @@ It should only modify the values of Spacemacs settings."
    ;; (default t)
    dotspacemacs-colorize-cursor-according-to-state t
 
-   ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
-   ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Source Code Pro"
-                               :size 14
-                               :weight semi-bold
+   ;; Default font or prioritized list of fonts.
+   dotspacemacs-default-font '("Anonymous Pro"
+                               :size 10.5
+                               :weight normal
                                :width normal)
 
    ;; The leader key (default "SPC")
@@ -312,9 +341,9 @@ It should only modify the values of Spacemacs settings."
    ;; Maximum number of rollback slots to keep in the cache. (default 5)
    dotspacemacs-max-rollback-slots 5
 
-   ;; If non-nil, the paste transient-state is enabled. While enabled, pressing
-   ;; `p' several times cycles through the elements in the `kill-ring'.
-   ;; (default nil)
+   ;; If non-nil, the paste transient-state is enabled. While enabled, after you
+   ;; paste something, pressing `C-j' and `C-k' several times cycles through the
+   ;; elements in the `kill-ring'. (default nil)
    dotspacemacs-enable-paste-transient-state nil
 
    ;; Which-key delay in seconds. The which-key buffer is the popup listing
@@ -352,6 +381,11 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil) (Emacs 24.4+ only)
    dotspacemacs-maximized-at-startup nil
 
+   ;; If non-nil the frame is undecorated when Emacs starts up. Combine this
+   ;; variable with `dotspacemacs-maximized-at-startup' in OSX to obtain
+   ;; borderless fullscreen. (default nil)
+   dotspacemacs-undecorated-at-startup nil
+
    ;; A value from the range (0..100), in increasing opacity, which describes
    ;; the transparency level of a frame when it's active or selected.
    ;; Transparency can be toggled through `toggle-transparency'. (default 90)
@@ -379,10 +413,14 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-smooth-scrolling t
 
    ;; Control line numbers activation.
-   ;; If set to `t' or `relative' line numbers are turned on in all `prog-mode' and
-   ;; `text-mode' derivatives. If set to `relative', line numbers are relative.
+   ;; If set to `t', `relative' or `visual' then line numbers are enabled in all
+   ;; `prog-mode' and `text-mode' derivatives. If set to `relative', line
+   ;; numbers are relative. If set to `visual', line numbers are also relative,
+   ;; but lines are only visual lines are counted. For example, folded lines
+   ;; will not be counted and wrapped lines are counted as multiple lines.
    ;; This variable can also be set to a property list for finer control:
    ;; '(:relative nil
+   ;;   :visual nil
    ;;   :disabled-for-modes dired-mode
    ;;                       doc-view-mode
    ;;                       markdown-mode
@@ -390,6 +428,7 @@ It should only modify the values of Spacemacs settings."
    ;;                       pdf-view-mode
    ;;                       text-mode
    ;;   :size-limit-kb 1000)
+   ;; When used in a plist, `visual' takes precedence over `relative'.
    ;; (default nil)
    dotspacemacs-line-numbers nil
 
@@ -402,7 +441,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-smartparens-strict-mode nil
 
    ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
-   ;; over any automatically added closing parenthesis, bracket, quote, etc…
+   ;; over any automatically added closing parenthesis, bracket, quote, etc...
    ;; This can be temporary disabled by pressing `C-q' before `)'. (default nil)
    dotspacemacs-smart-closing-parenthesis nil
 
@@ -484,10 +523,14 @@ This function is called immediately after `dotspacemacs/init', before layer
 configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
-  (setq configuration-layer-elpa-archives
-    '(("melpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
-      ("org-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
-      ("gnu-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")))
+  (set-default-coding-systems 'utf-8)
+  (setq url-gateway-method 'socks)
+  (setq socks-server '("Default server" "127.0.0.1" 1080 5))
+
+  ;;(setq configuration-layer-elpa-archives
+  ;;    '(("melpa-cn" . "http://elpa.emacs-china.org/melpa/")
+  ;;      ("org-cn"   . "http://elpa.emacs-china.org/org/")
+  ;;      ("gnu-cn"   . "http://elpa.emacs-china.org/gnu/")))
   )
 
 (defun dotspacemacs/user-load ()
@@ -505,23 +548,87 @@ Put your configuration code here, except for variables that should be set
 before packages are loaded."
   (dolist (charset '(kana han cjk-misc bopomofo))
     (set-fontset-font (frame-parameter nil 'font) charset
-                      (font-spec :family "Hiragino Sans GB" :size 16)))
+                      (font-spec :family "Hiragino Sans GB" :size 12.0)))
 
-  (setq org-confirm-babel-evaluate nil
-        org-src-fontify-natively t
-        org-src-tab-acts-natively t)
-  (setq spaceline-org-clock-p t)
+  ;; specify font for all unicode characters
+  (setq use-default-font-for-symbols nil)
+  (when (member "Symbola" (font-family-list))
+    (set-fontset-font t 'unicode "Symbola" nil 'prepend))
 
-  (setq org-ref-default-bibliography '("~/Dropbox/Papers/references.bib")
-        org-ref-pdf-directory "~/Dropbox/Papers/"
-        org-ref-bibliography-notes "~/Dropbox/Papers/notes.org")
+  (add-hook 'doc-view-mode-hook 'auto-revert-mode)
 
-  (setq org-ref-open-pdf-function
-        (lambda (fpath)
-          (start-process "zathura" "*helm-bibtex-zathura*" "/usr/bin/zathura" fpath)))
-  (setq powerline-height 20)
+  (setq x86-lookup-pdf "~/Dropbox/personal/64-ia-32-manual-325383.pdf")
+
+  (setq doom-modeline-height 18)
+  ;;(set-face-attribute 'mode-line nil :height 100)
+  ;;(set-face-attribute 'mode-line-inactive nil :height 100)
 
   (setq markdown-command "/usr/bin/pandoc")
+  (setq-default with-editor-emacsclient-executable "emacsclient")
+  (setq calc-gnuplot-name "/usr/bin/gnuplot")
+
+  (setq org-file-apps
+        '((auto-mode . emacs)
+          ("\\.x?html?\\'" . "chromium %s")
+          ("\\.gif\\'" . "sxiv \"%s\"")
+          ("\\.mp4\\'" . "mpv \"%s\"")
+          ("\\.mkv" . "mpv \"%s\"")))
+
+  (setq org-attach-screenshot-command-line "flameshot gui -p %f")
+
+  (defun iqbal-elfeed-search-open-article-in-w3m ()
+    (interactive)
+    (let ((browse-url-browser-function (cond ((locate-library "w3m") #'w3m-browse-url)
+                                             ((locate-library "eww") #'eww-browse-url)
+                                             (t (progn (message "`w3m' not installed, falling back to system browser")
+                                                       #'browse-url-default-browser)))))
+      (elfeed-search-untag-all 'unread)
+      (save-excursion
+        (forward-line -1)
+        (elfeed-search-browse-url))))
+
+(defun iqbal-elfeed-show-reddit-get-orig-article ()
+  (save-excursion
+    (goto-char (point-min))
+    (when (search-forward "[link]" (point-max) t)
+      (goto-char (match-beginning 0))
+      (let ((text-prop (text-properties-at (point))))
+        (and (member 'shr-link (text-properties-at (point)))
+             (plist-get (text-properties-at (point)) 'shr-url))))))
+
+(defun iqbal-elfeed-show-open-article-in-w3m ()
+  (interactive)
+  (let* ((feed-link (elfeed-entry-link elfeed-show-entry))
+         ;; If this is a reddit feed try jumping to original
+         ;; article instead of reddit link
+         (link (if (and (not current-prefix-arg)
+                        (string-match-p "reddit\.com/r/" feed-link))
+                   (or (iqbal-elfeed-show-reddit-get-orig-article) feed-link)
+                 feed-link)))
+    (if link
+        (cond ((locate-library "w3m") (w3m-browse-url link))
+              ((locate-library "eww") (eww-browse-url link))
+              (t (progn (message "`w3m' not installed, falling back to system browser")
+                        (elfeed-show-visit))))
+      (message "Not visiting an article!"))))
+
+    (treemacs-resize-icons 18)
+    (setq treemacs-width 28)
+
+    (setq cal-html-directory "~/Dropbox/personal/calendar")
+    (setq diary-file "~/Dropbox/personal/calendar/diary")
+    ;;(spacemacs/enable-transparency)
+
+    (with-eval-after-load 'company
+      (add-to-list 'company-backends #'company-tabnine))
+
+    ;; Trigger completion immediately.
+    (setq company-idle-delay 0)
+
+    ;; Number the candidates (use M-1, M-2 etc to select completions).
+    (setq company-show-numbers t)
+
+    (spacemacs/enable-transparency)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -536,9 +643,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (sql-indent youdao-dictionary yasnippet-snippets yapfify xterm-color ws-butler winum which-key web-mode web-beautify wanderlust volatile-highlights vmd-mode vi-tilde-fringe uuidgen use-package unfill toc-org tide tagedit symon string-inflection stickyfunc-enhance srefactor spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode restart-emacs rebox2 realgud rainbow-delimiters qml-mode pyvenv pytest pyim pyenv-mode py-isort pug-mode prettier-js powershell popwin plantuml-mode pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox pangu-spacing ox-gfm overseer orgit org-ref org-projectile org-present org-pomodoro org-mime org-journal org-download org-bullets org-brain open-junk-file nov neotree nameless mwim multi-term move-text monokai-theme mmm-mode markdown-toc magit-svn magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode ibuffer-projectile hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-xref helm-themes helm-swoop helm-rtags helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gtags helm-gitignore helm-git-grep helm-flx helm-descbinds helm-ctest helm-css-scss helm-company helm-c-yasnippet helm-ag gruvbox-theme graphviz-dot-mode google-translate google-c-style golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md ggtags fuzzy font-lock+ flycheck-rtags flycheck-pos-tip flx-ido find-by-pinyin-dired fill-column-indicator fcitx fasd fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help erc-yt erc-view-log erc-social-graph erc-image erc-hl-nicks emmet-mode elisp-slime-nav editorconfig dumb-jump dotenv-mode doom-modeline disaster diminish diff-hl deft define-word cython-mode counsel-projectile company-web company-tern company-statistics company-rtags company-c-headers company-auctex company-anaconda column-enforce-mode cmake-mode cmake-ide clean-aindent-mode clang-format chinese-conv centered-cursor-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-compile all-the-icons-dired aggressive-indent adoc-mode ace-window ace-pinyin ace-link ace-jump-helm-line ac-ispell))))
+ '(package-selected-packages '(ansi package-build shut-up epl git commander f dash s)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
